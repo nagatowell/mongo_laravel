@@ -1,0 +1,46 @@
+version: '2'
+services:
+    web:
+        build:
+            context: ./
+            dockerfile: web-mongo.docker
+        volumes:
+            - ./:/var/www
+        ports:
+            - "8000:80"
+            - "4430:443"
+        links:
+            - app
+            - database
+            - mongodb   
+    app:
+        build:
+            context: ./
+            dockerfile: app.docker
+        ports:
+            - "9001:9000"
+        volumes:
+            - ./:/var/www
+    database:
+        restart: 'no'
+        image: mysql:5.6
+        environment:
+            - "MYSQL_ROOT_PASSWORD=secret"
+            - "MYSQL_DATABASE=psy_transp"
+        ports:
+            - "33061:3306"
+
+    mongodb:
+        image: mongo:latest
+        container_name: "mongodb"
+        environment:
+          - MONGO_DATA_DIR=/data/db
+          - MONGO_LOG_DIR=/dev/null
+          - MONGODB_USERNAME=root
+          - MONGODB_PASSWORD=secret
+          - MONGODB_DATABASE=database
+        volumes:
+          - ./data/db:/data/db
+        ports:
+            - 27017:27017
+        command: mongod --smallfiles --logpath=/dev/null 
